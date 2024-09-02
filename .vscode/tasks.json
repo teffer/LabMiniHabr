@@ -1,0 +1,41 @@
+{
+	"tasks": [
+		{
+			"command": "build-debug",
+			"label": "build",
+			"options": {
+				"cwd": "${workspaceFolder}/scripts"
+			},
+			"presentation": {
+				"clear": true
+			},
+			"problemMatcher": "$msCompile",
+			"type": "shell"
+		},
+		{
+			"command": "fix-all",
+			"label": "fix-all",
+			"options": {
+				"cwd": "${workspaceFolder}/scripts"
+			},
+			"presentation": {
+				"clear": true
+			},
+			"problemMatcher": "$msCompile",
+			"type": "shell"
+		},
+		{
+			"command": "check-all",
+			"label": "check-all",
+			"options": {
+				"cwd": "${workspaceFolder}/scripts"
+			},
+			"presentation": {
+				"clear": true
+			},
+			"problemMatcher": "$msCompile",
+			"type": "shell"
+		}
+	],
+	"version": "2.0.0"
+}

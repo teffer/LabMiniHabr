@@ -1,0 +1,30 @@
+#!/bin/bash
+set -Eeuo pipefail
+if [[ "${#}" -eq 0 ]]; then
+	echo "Usage: bash ${0} BASH_SCRIPT_PATH..." >&2
+	exit 1
+fi
+base_path="$(dirname -- "$(realpath -- "${BASH_SOURCE[0]}")")"
+run_bash_bat_path="$(realpath -- "${base_path}/run-bash.bat")"
+if [[ ! -f "${run_bash_bat_path}" ]]; then
+	echo "File ${run_bash_bat_path@Q} not found" >&2
+	exit 1
+fi
+bash_script_paths=("${@}")
+echo "Generating *.bat wrappers for ${bash_script_paths[@]@Q}"
+for bash_script_path in "${bash_script_paths[@]}"; do
+	if [[ ! -f "${bash_script_path}" ]]; then
+		echo "File ${bash_script_path@Q} not found" >&2
+		exit 1
+	fi
+	wrapper_bat_file_path="${bash_script_path}.bat"
+	run_bash_relative_path="$(realpath --relative-to "$(dirname -- "${bash_script_path}")" -- "${run_bash_bat_path}")"
+	wrapper_bat_file_content="$(
+		cat <<EOF
+@echo off
+call "%~dp0${run_bash_relative_path}" "%~dp0%~n0" %* || if /i %0 == "%~0" pause
+exit /b %ERRORLEVEL%
+EOF
+)"
+	echo "${wrapper_bat_file_content}" > "${wrapper_bat_file_path}"
+done

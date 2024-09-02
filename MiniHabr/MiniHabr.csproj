@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+		<PackageReference Include="Npgsql" Version="7.0.6" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="TestHelpers\frequency-lists\*.txt" />
+		<EmbeddedResource Include="TestHelpers\frequency-lists\*.txt" />
+	</ItemGroup>
+</Project>

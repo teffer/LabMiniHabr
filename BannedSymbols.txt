@@ -1,0 +1,3 @@
+# https://github.com/dotnet/roslyn-analyzers/blob/v3.3.4/src/Microsoft.CodeAnalysis.BannedApiAnalyzers/BannedApiAnalyzers.Help.md
+M:System.Collections.Generic.List`1.ForEach(System.Action{`0}); use `foreach` loop
+M:System.Linq.Enumerable.Any``1(System.Collections.Generic.IEnumerable{``0}); use `x.Count != 0`

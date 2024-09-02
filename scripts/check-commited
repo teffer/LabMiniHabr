@@ -1,0 +1,8 @@
+#!/bin/bash
+set -Eeuo pipefail
+cd "$(dirname -- "$(realpath -- "${BASH_SOURCE[0]}")")"
+changed="$(git status --porcelain | wc -l)"
+if [[ "${changed}" -ne 0 ]]; then
+	echo -e "\033[0;31mUncommited files: ${changed}\033[0m"
+	exit 1
+fi

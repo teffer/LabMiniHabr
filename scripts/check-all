@@ -1,0 +1,15 @@
+#!/bin/bash
+set -Eeuo pipefail
+trap 'echo -e "\033[0;31m!!! ERROR !!!\033[0m"' ERR
+cd "$(dirname -- "$(realpath -- "${BASH_SOURCE[0]}")")"
+set -x
+time (
+	trap '' ERR
+	./fix-scripts
+	./format-text-files
+	./build-debug
+	./build-release
+	./check-dotnet-format --no-restore
+	./check-commited || true
+	true
+)

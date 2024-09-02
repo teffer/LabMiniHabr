@@ -1,0 +1,32 @@
+#!/bin/bash
+set -Eeuo pipefail
+cd "$(dirname -- "$(realpath -- "${BASH_SOURCE[0]}")")"
+{
+	script_file_paths=()
+	while IFS= read -r -d '' script_file_path; do
+		script_file_paths+=("${script_file_path}")
+	done < <(find . -type f -not -name '*.*' -print0)
+	echo "Fixing permissions for ${script_file_paths[@]@Q}"
+	chmod +x -- "${script_file_paths[@]}"
+	git add --chmod=+x -- "${script_file_paths[@]}" || true
+}
+{
+	bat_file_paths=()
+	while IFS= read -r -d '' bat_file_path; do
+		script_file_path="${bat_file_path%.*}"
+		if [[ ! -f "${script_file_path}" ]]; then
+			bat_file_paths+=("${bat_file_path}")
+		fi
+	done < <(find . -type f -iname '?*.bat' -not -iregex '.*/_internal/.*' -print0)
+	if [[ "${#bat_file_paths[@]}" -eq 0 ]]; then
+		echo "No unused *.bat files found"
+	else
+		echo "Deleting unused ${bat_file_paths[@]@Q}"
+		rm -- "${bat_file_paths[@]}"
+	fi
+}
+{
+	find . -type f -not -name '*.*' -not -iregex '.*/_internal/.*' -print0 | \
+		xargs --null --no-run-if-empty --max-procs 0 --max-args 4 \
+			"${SHELL}" --norc ./_internal/generate-wrapper-bat-file
+}

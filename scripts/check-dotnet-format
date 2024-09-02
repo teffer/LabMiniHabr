@@ -1,0 +1,8 @@
+#!/bin/bash
+set -Eeuo pipefail
+cd "$(dirname -- "$(realpath -- "${BASH_SOURCE[0]}")")"
+cd ..
+(
+	set -x
+	dotnet format --severity info --verify-no-changes "${@}"
+)

@@ -1,0 +1,6 @@
+#!/bin/bash
+set -Eeuo pipefail
+cd "$(dirname -- "$(realpath -- "${BASH_SOURCE[0]}")")"
+cd ..
+set -x
+dotnet build --configuration=Debug /property:GenerateFullPaths=true "${@}"

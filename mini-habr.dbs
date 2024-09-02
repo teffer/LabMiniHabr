@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="mini-habr" id="Project-a32" database="PostgreSQL" >
+	<schema name="public" >
+		<comment><![CDATA[standard public schema]]></comment>
+		<table name="app_users" >
+			<comment><![CDATA[Пользователи]]></comment>
+			<column name="id" type="uuid" jt="102" mandatory="y" >
+				<defo><![CDATA[gen_random_uuid()]]></defo>
+			</column>
+			<column name="full_name" type="text" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<column name="handle" type="text" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<column name="upper(handle)" type="varchar" jt="12" spec="functional" />
+			<index name="pk_app_user" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_app_user_handle" unique="UNIQUE_INDEX" >
+				<column name="upper(handle)" />
+			</index>
+		</table>
+		<table name="article_comments" >
+			<comment><![CDATA[Комментарии к статье]]></comment>
+			<column name="id" type="uuid" jt="102" mandatory="y" >
+				<defo><![CDATA[gen_random_uuid()]]></defo>
+			</column>
+			<column name="article_id" type="uuid" jt="102" mandatory="y" />
+			<column name="user_id" type="uuid" jt="102" mandatory="y" />
+			<column name="parent_comment_id" type="uuid" jt="102" />
+			<column name="publication_time" type="timestamptz" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<column name="content" type="text" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<index name="pk_article_comment" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="idx_article_comment" unique="NORMAL" >
+				<column name="article_id" />
+				<column name="publication_time" />
+			</index>
+			<fk name="fk_article_comment_article" to_schema="public" to_table="articles" >
+				<fk_column name="article_id" pk="id" />
+			</fk>
+			<fk name="fk_article_comment_article_comment" to_schema="public" to_table="article_comments" >
+				<fk_column name="parent_comment_id" pk="id" />
+			</fk>
+			<fk name="fk_article_comment_app_user" to_schema="public" to_table="app_users" >
+				<fk_column name="user_id" pk="id" />
+			</fk>
+		</table>
+		<table name="article_hub_links" >
+			<column name="article_id" type="uuid" jt="102" mandatory="y" />
+			<column name="hub_id" type="uuid" jt="102" mandatory="y" />
+			<index name="pk_article_to_stream" unique="PRIMARY_KEY" >
+				<column name="article_id" />
+				<column name="hub_id" />
+			</index>
+			<fk name="fk_article_to_stream_article" to_schema="public" to_table="articles" >
+				<fk_column name="article_id" pk="id" />
+			</fk>
+			<fk name="fk_article_to_stream_stream" to_schema="public" to_table="hubs" >
+				<fk_column name="hub_id" pk="id" />
+			</fk>
+		</table>
+		<table name="articles" >
+			<comment><![CDATA[Статьи]]></comment>
+			<column name="id" type="uuid" jt="102" mandatory="y" >
+				<defo><![CDATA[gen_random_uuid()]]></defo>
+			</column>
+			<column name="title" type="text" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<column name="content_text" type="text" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<column name="author_user_id" type="uuid" jt="102" mandatory="y" />
+			<column name="company_id" type="uuid" jt="102" />
+			<column name="is_published" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[false]]></defo>
+			</column>
+			<column name="publication_time" type="timestamptz" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<column name="view_count" type="bigint" jt="-5" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_article" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_article_app_user" to_schema="public" to_table="app_users" >
+				<fk_column name="author_user_id" pk="id" />
+			</fk>
+			<fk name="fk_article_company" to_schema="public" to_table="companies" >
+				<fk_column name="company_id" pk="id" />
+			</fk>
+		</table>
+		<table name="comment_bookmarks" >
+			<column name="comment_id" type="uuid" decimal="0" jt="102" mandatory="y" />
+			<column name="user_id" type="uuid" decimal="0" jt="102" mandatory="y" />
+			<column name="creation_time" type="timestamptz" decimal="6" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<index name="pk_comment_bookmarks" unique="PRIMARY_KEY" >
+				<column name="user_id" />
+				<column name="comment_id" />
+			</index>
+			<fk name="fk_comment_bookmarks_app_users" to_schema="public" to_table="app_users" >
+				<fk_column name="user_id" pk="id" />
+			</fk>
+			<fk name="fk_comment_bookmarks" to_schema="public" to_table="article_comments" >
+				<fk_column name="comment_id" pk="id" />
+			</fk>
+		</table>
+		<table name="companies" >
+			<comment><![CDATA[Компании]]></comment>
+			<column name="id" type="uuid" jt="102" mandatory="y" >
+				<defo><![CDATA[gen_random_uuid()]]></defo>
+			</column>
+			<column name="name" type="text" length="100" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<column name="handle" type="text" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+				<comment><![CDATA[Кусок URL-а]]></comment>
+			</column>
+			<column name="upper(handle)" type="varchar" jt="12" spec="functional" />
+			<index name="pk_company" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_company_handle" unique="UNIQUE_INDEX" >
+				<column name="upper(handle)" />
+			</index>
+		</table>
+		<table name="hubs" >
+			<comment><![CDATA[Хабы (группы статей)]]></comment>
+			<column name="id" type="uuid" jt="102" mandatory="y" >
+				<defo><![CDATA[gen_random_uuid()]]></defo>
+			</column>
+			<column name="name" type="text" length="100" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<column name="handle" type="text" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+				<comment><![CDATA[Кусок URL-а]]></comment>
+			</column>
+			<column name="upper(handle)" type="varchar" jt="12" spec="functional" />
+			<index name="pk_article_group" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_hub_handle" unique="UNIQUE_INDEX" >
+				<column name="upper(handle)" />
+			</index>
+		</table>
+		<table name="poll_variants" >
+			<comment><![CDATA[Варианты ответа]]></comment>
+			<column name="id" type="uuid" jt="102" mandatory="y" >
+				<defo><![CDATA[gen_random_uuid()]]></defo>
+			</column>
+			<column name="poll_id" type="uuid" jt="102" mandatory="y" />
+			<column name="pos" type="integer" jt="4" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="title" type="text" length="100" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<index name="pk_poll_variant" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_poll_variant_poll" to_schema="public" to_table="polls" >
+				<fk_column name="poll_id" pk="id" />
+			</fk>
+		</table>
+		<table name="polls" >
+			<comment><![CDATA[Опросы]]></comment>
+			<column name="id" type="uuid" jt="102" mandatory="y" >
+				<defo><![CDATA[gen_random_uuid()]]></defo>
+			</column>
+			<column name="article_id" type="uuid" jt="102" mandatory="y" />
+			<column name="pos" type="integer" jt="4" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<column name="title" type="text" jt="12" mandatory="y" >
+				<defo><![CDATA[''::text]]></defo>
+			</column>
+			<column name="multiple" type="boolean" jt="16" mandatory="y" >
+				<defo><![CDATA[false]]></defo>
+				<comment><![CDATA[Множественный выбор]]></comment>
+			</column>
+			<index name="pk_poll" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_poll_article" to_schema="public" to_table="articles" >
+				<fk_column name="article_id" pk="id" />
+			</fk>
+		</table>
+		<table name="user_company_links" >
+			<column name="user_id" type="uuid" jt="102" mandatory="y" />
+			<column name="company_id" type="uuid" jt="102" mandatory="y" />
+			<index name="pk_user_company_link" unique="PRIMARY_KEY" >
+				<column name="user_id" />
+				<column name="company_id" />
+			</index>
+			<fk name="fk_user_company_link_app_user" to_schema="public" to_table="app_users" >
+				<fk_column name="user_id" pk="id" />
+			</fk>
+			<fk name="fk_user_company_link_company" to_schema="public" to_table="companies" >
+				<fk_column name="company_id" pk="id" />
+			</fk>
+		</table>
+	</schema>
+	<connector name="PostgreSQL" database="PostgreSQL" driver_class="org.postgresql.Driver" driver_jar="postgresql-42.6.0.jar" driver_desc="Standard" host="127.0.0.2" port="5433" instance="mini_habr" user="postgres" useSystemProxy="false" />
+	<layout name="Default Layout" id="Layout-2047" joined_routing="y" show_relation="no_text" >
+		<comment><![CDATA[mini_habr]]></comment>
+		<entity schema="public" name="app_users" color="3986C1" x="912" y="64" />
+		<entity schema="public" name="article_comments" color="C1D8EE" x="240" y="656" />
+		<entity schema="public" name="article_hub_links" color="C1D8EE" x="288" y="96" />
+		<entity schema="public" name="articles" color="C1D8EE" x="48" y="48" />
+		<entity schema="public" name="comment_bookmarks" color="3986C1" x="672" y="368" />
+		<entity schema="public" name="companies" color="C1D8EE" x="1264" y="64" />
+		<entity schema="public" name="hubs" color="C1D8EE" x="480" y="64" />
+		<entity schema="public" name="poll_variants" color="C1D8EE" x="400" y="528" />
+		<entity schema="public" name="polls" color="C1D8EE" x="240" y="464" />
+		<entity schema="public" name="user_company_links" color="C1D8EE" x="1088" y="96" />
+	</layout>
+</project>

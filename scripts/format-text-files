@@ -1,0 +1,14 @@
+#!/bin/bash
+set -Eeuo pipefail
+cd "$(dirname -- "$(realpath -- "${BASH_SOURCE[0]}")")"
+cd ..
+set -x
+sed_args=(
+	-e $'1s/\xef\xbb\xbf//' # utf-8-bom -> utf-8
+	-e $'/^\s*$/d' # remove empty lines
+	-e $'s/[ \t]*$//' # remove trailing spaces
+	-e '$a\' # add final newline
+)
+find . -type f -iregex '.*\.\(cs\|csproj\|json\|txt\)$' -not -iregex '\./\..*\|.*/\(bin\|obj\)/.*' -print0 | \
+	xargs --null --no-run-if-empty --max-procs 0 \
+		sed -ri "${sed_args[@]}"
